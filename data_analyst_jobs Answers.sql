@@ -43,22 +43,22 @@ GROUP BY location;
 --ANSWER: NE 4.1999
 
 --7. Select unique job titles from the data_analyst_jobs table. How many are there?
-SELECT DISTINCT title
+SELECT COUNT (DISTINCT title)
 FROM data_analyst_jobs;
 --ANSWER: 881
 
 --8. How many unique job titles are there for California companies?
-SELECT DISTINCT title, location
+SELECT COUNT(DISTINCT title), location
 FROM data_analyst_jobs
 WHERE location = 'CA';
 --ANSWER: 230
 
 --9. Find the name of each company and its average star rating for all companies that have more than 5000 reviews across all locations. How many companies are there with more that 5000 reviews across all locations?
-SELECT AVG(star_rating), company, location
+SELECT AVG(star_rating), company
 FROM data_analyst_jobs
-WHERE review_count > 5000
-GROUP BY DISTINCT company, location;
---ANSWER: 80
+WHERE review_count > 5000 AND company IS NOT NULL
+GROUP BY company;
+--ANSWER: 40
 
 --10. Add the code to order the query in #9 from highest to lowest average star rating. Which company with more than 5000 reviews across all locations in the dataset has the highest star rating? What is that rating?
 SELECT AVG(star_rating), company, location
@@ -77,14 +77,20 @@ WHERE title ILIKE '%Analyst%';
 --12.	How many different job titles do not contain either the word ‘Analyst’ or the word ‘Analytics’? What word do these positions have in common?
 SELECT DISTINCT title
 FROM data_analyst_jobs
-WHERE title NOT IN ('%Analyst%','%Analytics%');
+WHERE title NOT ILIKE '%Analyst%'
+AND title NOT ILIKE '%Analytics%';
+--ANSWER: Tableau
 
 --**BONUS:**You want to understand which jobs requiring SQL are hard to fill. Find the number of jobs by industry (domain) that require SQL and have been posted longer than 3 weeks. Disregard any postings where the domain is NULL. Order your results so that the domain with the greatest number of `hard to fill` jobs is at the top. Which three industries are in the top 4 on this list? How many jobs have been listed for more than 3 weeks for each of the top 4?
 SELECT COUNT(title), domain
 FROM data_analyst_jobs
-WHERE skill = 'SQL'
-AND domain <> 'null'
-AND days_since_posting >= 21
+WHERE skill ILIKE '%SQL%'
+AND domain IS NOT NULL
+AND days_since_posting > 21
 GROUP BY domain
-ORDER BY COUNT(title) DESC;
---ANSWER: 1. Consulting and Business Services (5), Consumer Goods and Services(2), Computers and Electronics(1).
+ORDER BY COUNT(title) DESC
+LIMIT 4;
+--ANSWER: 1. 62	"Internet and Software"
+--61	"Banks and Financial Services"
+--57	"Consulting and Business Services"
+--52	"Health Care"
